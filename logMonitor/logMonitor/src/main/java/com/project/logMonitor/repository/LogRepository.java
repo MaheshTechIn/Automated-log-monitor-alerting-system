@@ -20,8 +20,6 @@ public interface LogRepository extends JpaRepository<LogEntity, Long> {
     @Query("SELECT COUNT(l) FROM LogEntity l")
     long countTotalLogs();
 
-//  long countLogsByLevelSince(String level, LocalDateTime fromTime);
-
     long countByLevelAndTimestampAfter(
             String level,
             LocalDateTime time
