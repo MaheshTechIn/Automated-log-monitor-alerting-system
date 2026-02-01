@@ -2,6 +2,8 @@ package com.project.logMonitor.entity;
 
 import jakarta.persistence.*;
 
+import java.time.LocalDateTime;
+
 @Entity
 @Table(name = "alerts")
 public class AlertEntity {
@@ -13,7 +15,7 @@ public class AlertEntity {
     private String type;
     private String message;
     private String createdAt;
-
+//    private boolean active;   // to track the logs
 
     public Long getId() {
         return id;

@@ -10,7 +10,9 @@ import java.time.LocalDateTime;
 //
 //@Service
 //public class AlertService {
-//    private  static  final int ERROR_THRESHOLD = 2;
+//
+//    private static final int ERROR_THRESHOLD = 2;
+//    private static final int WINDOW_MINUTES = 5;
 //
 //    @Autowired
 //    private LogRepository logRepository;
@@ -18,20 +20,36 @@ import java.time.LocalDateTime;
 //    @Autowired
 //    private AlertRepository alertRepository;
 //
-//    public void checkErrorThreshold(){
-//        long errorCount  = logRepository.countByLevel("ERROR");
 //
-//        if(errorCount >= ERROR_THRESHOLD){
+//    public void checkErrorThreshold() {
+//
+//
+//        LocalDateTime tenMinutesAgo =
+//                LocalDateTime.now().minusMinutes(WINDOW_MINUTES);
+//
+//        long errorCount =
+//                logRepository.countByLevelAndTimestampAfter(
+//                        "ERROR", tenMinutesAgo
+//                );
+////        boolean alertAlreadyActive =
+////                alertRepository.existsByLevelAndActive("ERROR", true);
+//
+//        if (errorCount >= ERROR_THRESHOLD ) {
+//
 //            AlertEntity alert = new AlertEntity();
 //            alert.setType("ERROR_THRESHOLD");
-//            alert.setMessage("Error logs crossed threshold. count "+errorCount);
-//            alert.setCreatedAt(LocalDateTime.now().toString());
+//            alert.setMessage(
+//                    "ERROR logs >= " + ERROR_THRESHOLD +
+//                            " in last " + WINDOW_MINUTES + " minutes"
+//            );
+//            alert.setCreatedAt(LocalDateTime.now());
 //
 //            alertRepository.save(alert);
 //
-//            System.out.println("🚨 ALERTs Triggered successfully");
-//
+//            System.out.println("🚨 ALERT Triggered (window-based)");
 //        }
+//
+//
 //    }
 //}
 @Service
@@ -56,7 +74,13 @@ public class AlertService {
                         "ERROR", windowStart
                 );
 
-        if (errorCount >= ERROR_THRESHOLD) {
+        boolean alertRecentlyTriggered =
+                alertRepository.existsByTypeAndCreatedAtAfter(
+                        "ERROR_THRESHOLD",
+                        windowStart
+                );
+
+        if (errorCount >= ERROR_THRESHOLD && !alertRecentlyTriggered) {
 
             AlertEntity alert = new AlertEntity();
             alert.setType("ERROR_THRESHOLD");
@@ -68,7 +92,7 @@ public class AlertService {
 
             alertRepository.save(alert);
 
-            System.out.println("🚨 ALERT Triggered (window-based)");
+            System.out.println("🚨 ALERT Triggered (deduplicated)");
         }
     }
 }
